@@ -1,10 +1,10 @@
-import { Line } from "@ant-design/charts";
-import { Button, Card, Space, Table, Tag, Typography } from "antd";
+import { Button, Card, DatePicker, Form, Input, Modal, Space, Table, Tag, Typography } from "antd";
+import { useState } from "react";
 
 const { Column } = Table;
 
 export default function Promotions() {
-  const promotionsData = [
+  const [promotionsData, setPromotionsData] = useState([
     {
       key: "1",
       promotionName: "Summer Sale",
@@ -32,14 +32,40 @@ export default function Promotions() {
       status: "Active",
       tags: ["clearance", "discount"]
     }
-  ];
+  ]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+  };
+
+  const handleAddPromotion = (values) => {
+    const newPromotion = {
+      key: (promotionsData.length + 1).toString(),
+      ...values,
+      startDate: values.startDate.format("YYYY-MM-DD"),
+      endDate: values.endDate.format("YYYY-MM-DD"),
+      tags: values.tags.split(",")
+    };
+    setPromotionsData([...promotionsData, newPromotion]);
+    setIsModalVisible(false);
+    form.resetFields();
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <Typography.Title level={2}>Promotions</Typography.Title>
         <Space>
-          <Button type="primary">Add Promotion</Button>
+          <Button type="primary" onClick={showModal}>
+            Add Promotion
+          </Button>
         </Space>
       </div>
       <Card className="drop-shadow-sm">
@@ -74,6 +100,49 @@ export default function Promotions() {
           />
         </Table>
       </Card>
+      <Modal title="Add Promotion" visible={isModalVisible} onCancel={handleCancel} footer={null}>
+        <Form form={form} layout="vertical" onFinish={handleAddPromotion}>
+          <Form.Item
+            name="promotionName"
+            label="Promotion Name"
+            rules={[{ required: true, message: "Please enter the promotion name" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: "Please enter the description" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="startDate"
+            label="Start Date"
+            rules={[{ required: true, message: "Please select the start date" }]}
+          >
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item
+            name="endDate"
+            label="End Date"
+            rules={[{ required: true, message: "Please select the end date" }]}
+          >
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item name="status" label="Status" rules={[{ required: true, message: "Please select the status" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="tags" label="Tags" rules={[{ required: true, message: "Please enter the tags" }]}>
+            <Input placeholder="Enter tags separated by commas" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Add Promotion
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

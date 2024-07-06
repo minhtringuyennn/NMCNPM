@@ -1,10 +1,11 @@
 import { Line } from "@ant-design/charts";
-import { Button, Card, Space, Table, Tag, Typography } from "antd";
+import { Button, Card, DatePicker, Form, Input, Modal, Space, Table, Tag, Typography } from "antd";
+import { useState } from "react";
 
 const { Column } = Table;
 
 export default function Orders() {
-  const ordersData = [
+  const [ordersData, setOrdersData] = useState([
     { date: "2024-07-01", value: 20 },
     { date: "2024-07-02", value: 22 },
     { date: "2024-07-03", value: 19 },
@@ -12,7 +13,7 @@ export default function Orders() {
     { date: "2024-07-05", value: 23 },
     { date: "2024-07-06", value: 21 },
     { date: "2024-07-07", value: 26 }
-  ];
+  ]);
 
   const configOrders = {
     data: ordersData,
@@ -26,7 +27,7 @@ export default function Orders() {
     }
   };
 
-  const recentOrdersData = [
+  const [recentOrdersData, setRecentOrdersData] = useState([
     {
       key: "1",
       firstName: "John",
@@ -54,14 +55,40 @@ export default function Orders() {
       status: "Completed",
       amount: "$100"
     }
-  ];
+  ]);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+  };
+
+  const handleAddOrder = (values) => {
+    const newOrder = {
+      key: (recentOrdersData.length + 1).toString(),
+      ...values,
+      date: values.date.format("YYYY-MM-DD"),
+      tags: values.tags.split(",")
+    };
+    setRecentOrdersData([...recentOrdersData, newOrder]);
+    setIsModalVisible(false);
+    form.resetFields();
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <Typography.Title level={2}>Orders</Typography.Title>
         <Space>
-          <Button type="primary">Add Order</Button>
+          <Button type="primary" onClick={showModal}>
+            Add Order
+          </Button>
         </Space>
       </div>
       <Card className="drop-shadow-sm">
@@ -119,6 +146,41 @@ export default function Orders() {
           />
         </Table>
       </Card>
+      <Modal title="Add Order" visible={isModalVisible} onCancel={handleCancel} footer={null}>
+        <Form form={form} layout="vertical" onFinish={handleAddOrder}>
+          <Form.Item
+            name="firstName"
+            label="First Name"
+            rules={[{ required: true, message: "Please enter the first name" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="lastName"
+            label="Last Name"
+            rules={[{ required: true, message: "Please enter the last name" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="age" label="Age" rules={[{ required: true, message: "Please enter the age" }]}>
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item name="amount" label="Amount" rules={[{ required: true, message: "Please enter the amount" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="status" label="Status" rules={[{ required: true, message: "Please enter the status" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="tags" label="Tags" rules={[{ required: true, message: "Please enter the tags" }]}>
+            <Input placeholder="Enter tags separated by commas" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Add Order
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

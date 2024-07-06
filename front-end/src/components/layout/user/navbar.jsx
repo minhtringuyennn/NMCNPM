@@ -1,3 +1,4 @@
+import useUserStore from "@/stores/user";
 import { useNavigate } from "@tanstack/react-router";
 import { Layout, Menu } from "antd";
 import { ChevronDown, House, ShoppingBag, Truck, User } from "lucide-react";
@@ -6,8 +7,10 @@ import React, { useEffect, useState } from "react";
 const { Header } = Layout;
 
 const UserNavbar = () => {
+  const { user, setUser, clearUser } = useUserStore();
   const navigate = useNavigate();
   const [currentKey, setCurrentKey] = useState("home");
+  const isOwnerAndEmployee = user?.role === "owner" || user?.role === "employee";
 
   const items_left = [
     { key: "home", label: "Home", onClick: () => navigate({ to: "/" }) },
@@ -16,34 +19,40 @@ const UserNavbar = () => {
       key: "products",
       label: "Products",
       children: [
-        { key: "tea", label: "Tea", onClick: () => navigate({ to: "/products/tea" }) },
+        { key: "beverage", label: "Beverage", onClick: () => navigate({ to: "/products/beverage" }) },
         { key: "coffee", label: "Coffee", onClick: () => navigate({ to: "/products/coffee" }) }
       ]
     },
     { key: "recruitment", label: "Recruitment", onClick: () => navigate({ to: "/recruitment" }) }
   ];
 
+  const user_nav = !isOwnerAndEmployee
+    ? [
+        {
+          key: "tracking",
+          icon: (
+            <div style={{ verticalAlign: "middle" }}>
+              <Truck />
+            </div>
+          ),
+          label: "Tracking orders",
+          onClick: () => navigate({ to: "/tracking" })
+        },
+        {
+          key: "cart",
+          icon: (
+            <div style={{ verticalAlign: "middle" }}>
+              <ShoppingBag />
+            </div>
+          ),
+          label: "Cart",
+          onClick: () => navigate({ to: "/cart" })
+        }
+      ]
+    : [];
+
   const items_right = [
-    {
-      key: "tracking",
-      icon: (
-        <div style={{ verticalAlign: "middle" }}>
-          <Truck />
-        </div>
-      ),
-      label: "Tracking orders",
-      onClick: () => navigate({ to: "/tracking" })
-    },
-    {
-      key: "cart",
-      icon: (
-        <div style={{ verticalAlign: "middle" }}>
-          <ShoppingBag />
-        </div>
-      ),
-      label: "Cart",
-      onClick: () => navigate({ to: "/cart" })
-    },
+    ...user_nav,
     {
       key: "account",
       icon: (
